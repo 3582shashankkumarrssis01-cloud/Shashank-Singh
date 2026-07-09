@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOOYAH X — Free Fire Squad Championship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0F0D;
+    --panel:#121814;
+    --panel-2:#171f19;
+    --line: rgba(237,237,230,0.10);
+    --text:#EDEDE6;
+    --text-dim: #9BA79C;
+    --danger:#FF4423;
+    --danger-dim: rgba(255,68,35,0.15);
+    --safe:#2BB5A0;
+    --safe-dim: rgba(43,181,160,0.15);
+    --gold:#E8B84B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Barlow', sans-serif;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Teko', sans-serif;
+    font-weight:600;
+    letter-spacing:0.01em;
+    line-height:0.95;
+    text-transform:uppercase;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{color:inherit; text-decoration:none;}
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 32px; }
+  @media (max-width:640px){ .wrap{ padding:0 20px; } }
+
+  /* subtle background grid texture */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+    opacity:0.5;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 32px;
+    backdrop-filter: blur(10px);
+    background: rgba(11,15,13,0.55);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{ display:flex; align-items:center; gap:10px; }
+  .logo-mark{
+    width:14px; height:14px; border:2px solid var(--danger);
+    border-radius:50%;
+    box-shadow: 0 0 12px var(--danger);
+  }
+  .logo-text{ font-family:'Teko',sans-serif; font-size:24px; letter-spacing:0.06em; }
+  .nav-links{ display:flex; gap:32px; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
+  .nav-links a:hover{ color:var(--text); }
+  .nav-cta{
+    border:1px solid var(--danger); color:var(--danger);
+    padding:8px 18px; font-size:13px; text-transform:uppercase; letter-spacing:0.08em;
+    transition: all .2s ease;
+  }
+  .nav-cta:hover{ background:var(--danger); color:#0B0F0D; }
+  @media (max-width:860px){ .nav-links{ display:none; } }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex; align-items:center;
+    padding-top:80px;
+    overflow:hidden;
+  }
+  .zone-visual{
+    position:absolute; right:-10%; top:50%; transform:translateY(-50%);
+    width:720px; height:720px;
+    z-index:0;
+  }
+  @media (max-width:1024px){ .zone-visual{ opacity:0.25; right:-30%; } }
+  .zone-ring{
+    position:absolute; border-radius:50%;
+    border:1px solid var(--safe);
+    top:50%; left:50%;
+  }
+  .zone-ring.r1{ width:700px; height:700px; margin:-350px 0 0 -350px; opacity:0.15; }
+  .zone-ring.r2{ width:520px; height:520px; margin:-260px 0 0 -260px; opacity:0.25; }
+  .zone-ring.r3{ width:340px; height:340px; margin:-170px 0 0 -170px; border-color:var(--danger); opacity:0.5;
+    animation: shrink 6s ease-in-out infinite alternate;
+  }
+  @keyframes shrink{
+    0%{ width:340px; height:340px; margin:-170px 0 0 -170px; }
+    100%{ width:260px; height:260px; margin:-130px 0 0 -130px; }
+  }
+  .zone-dot{
+    position:absolute; width:6px; height:6px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 8px var(--gold);
+  }
+
+  .hero-inner{ position:relative; z-index:2; }
+  .eyebrow{
+    display:flex; align-items:center; gap:10px;
+    color:var(--danger); font-size:13px; letter-spacing:0.18em; text-transform:uppercase;
+    margin-bottom:20px;
+  }
+  .eyebrow::before{
+    content:''; width:24px; height:1px; background:var(--danger);
+  }
+  .hero h1{
+    font-size:clamp(64px, 11vw, 148px);
+    max-width:900px;
+  }
+  .hero h1 .accent{ color:var(--danger); }
+  .hero-sub{
+    max-width:520px; margin-top:22px; color:var(--text-dim);
+    font-size:17px; line-height:1.6;
+  }
+  .hero-actions{ display:flex; gap:16px; margin-top:36px; flex-wrap:wrap; }
+  .btn-primary{
+    background:var(--danger); color:#0B0F0D; font-weight:700;
+    padding:15px 30px; font-size:14px; text-transform:uppercase; letter-spacing:0.06em;
+    border:1px solid var(--danger);
+    transition: all .2s ease;
+  }
+  .btn-primary:hover{ background:transparent; color:var(--danger); }
+  .btn-ghost{
+    border:1px solid var(--line); color:var(--text);
+    padding:15px 30px; font-size:14px; text-transform:uppercase; letter-spacing:0.06em;
+    transition: all .2s ease;
+  }
+  .btn-ghost:hover{ border-color:var(--text); }
+
+  /* zone timer strip */
+  .timer-strip{
+    margin-top:56px;
+    display:flex; gap:0; border:1px solid var(--line);
+    max-width:560px;
+  }
+  .timer-cell{
+    flex:1; padding:16px 20px; border-right:1px solid var(--line);
+  }
+  .timer-cell:last-child{ border-right:none; }
+  .timer-cell .num{ font-family:'JetBrains Mono',monospace; font-size:30px; color:var(--gold); }
+  .timer-cell .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-dim); margin-top:4px; }
+
+  /* ---------- SECTION LABELS ---------- */
+  .section{ position:relative; z-index:1; padding:120px 0; border-top:1px solid var(--line); }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:24px; margin-bottom:56px; flex-wrap:wrap; }
+  .section-tag{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--safe);
+    letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; display:block;
+  }
+  .section-head h2{ font-size:clamp(38px,5vw,64px); }
+  .section-desc{ max-width:340px; color:var(--text-dim); font-size:15px; line-height:1.6; }
+
+  /* ---------- FORMAT / STATS ---------- */
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--line);
+  }
+  @media (max-width:860px){ .stat-grid{ grid-template-columns:repeat(2,1fr); } }
+  .stat-cell{
+    padding:36px 28px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .stat-cell:nth-child(4n){ border-right:none; }
+  @media (max-width:860px){ .stat-cell:nth-child(2n){ border-right:none; } .stat-cell:nth-child(4n){ border-right:1px solid var(--line); } .stat-cell:nth-child(2n){ border-right:none;} }
+  .stat-cell .val{ font-family:'Teko',sans-serif; font-size:56px; color:var(--text); }
+  .stat-cell .val span{ color:var(--danger); }
+  .stat-cell .lbl{ font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-top:6px; }
+
+  /* ---------- PRIZE ---------- */
+  .prize-list{ display:flex; flex-direction:column; }
+  .prize-row{
+    display:grid; grid-template-columns:80px 1fr auto; align-items:center;
+    padding:28px 0; border-bottom:1px solid var(--line);
+    gap:20px;
+  }
+  .prize-row:first-child{
+    border-top:1px solid var(--line);
+  }
+  .prize-rank{
+    font-family:'Teko',sans-serif; font-size:44px; color:var(--text-dim);
+  }
+  .prize-row.gold .prize-rank{ color:var(--gold); }
+  .prize-row.gold{ background:linear-gradient(90deg, rgba(232,184,75,0.06), transparent); }
+  .prize-team-label{ font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; }
+  .prize-amount{ font-family:'JetBrains Mono',monospace; font-size:26px; color:var(--text); white-space:nowrap; }
+  .prize-row.gold .prize-amount{ color:var(--gold); }
+
+  /* ---------- SCHEDULE ---------- */
+  .schedule{ display:flex; flex-direction:column; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .day-row{
+    background:var(--bg); padding:26px 28px;
+    display:grid; grid-template-columns:140px 1fr 160px; align-items:center; gap:16px;
+  }
+  @media (max-width:700px){ .day-row{ grid-template-columns:1fr; gap:6px; } }
+  .day-date{ font-family:'JetBrains Mono',monospace; color:var(--safe); font-size:14px; }
+  .day-title{ font-size:17px; font-weight:600; }
+  .day-phase{ text-align:right; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
+  @media (max-width:700px){ .day-phase{ text-align:left; } }
+  .day-row.live .day-date{ color:var(--danger); }
+  .day-row.live .day-phase{ color:var(--danger); }
+
+  /* ---------- FORMAT CARDS ---------- */
+  .format-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  @media (max-width:860px){ .format-grid{ grid-template-columns:1fr; } }
+  .format-card{ background:var(--bg); padding:36px 30px; }
+  .format-card .fnum{ font-family:'JetBrains Mono',monospace; color:var(--danger); font-size:13px; margin-bottom:18px; display:block; }
+  .format-card h3{ font-size:30px; margin-bottom:10px; }
+  .format-card p{ color:var(--text-dim); font-size:14px; line-height:1.7; }
+
+  /* ---------- REGISTER ---------- */
+  .register-panel{
+    border:1px solid var(--line); padding:56px;
+    background: radial-gradient(circle at 100% 0%, rgba(255,68,35,0.06), transparent 60%);
+    display:grid; grid-template-columns:1fr 1fr; gap:48px;
+  }
+  @media (max-width:860px){ .register-panel{ grid-template-columns:1fr; padding:32px; } }
+  .register-info h2{ font-size:44px; margin-bottom:16px; }
+  .register-info p{ color:var(--text-dim); font-size:15px; line-height:1.7; margin-bottom:24px; }
+  .register-info ul{ list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .register-info li{ display:flex; gap:12px; font-size:14px; color:var(--text-dim); align-items:flex-start; }
+  .register-info li::before{ content:'▸'; color:var(--safe); }
+
+  .field{ margin-bottom:18px; }
+  .field label{ display:block; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:8px; }
+  .field input, .field select{
+    width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text);
+    padding:13px 14px; font-family:'Barlow',sans-serif; font-size:15px;
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--safe); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:500px){ .field-row{ grid-template-columns:1fr; } }
+  .submit-btn{
+    width:100%; background:var(--danger); border:1px solid var(--danger); color:#0B0F0D;
+    padding:16px; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; font-weight:700;
+    margin-top:8px; cursor:pointer; transition:all .2s ease;
+  }
+  .submit-btn:hover{ background:transparent; color:var(--danger); }
+  .form-note{ font-size:12px; color:var(--text-dim); margin-top:14px; text-align:center; }
+
+  /* ---------- RULES ---------- */
+  .rules-list{ display:flex; flex-direction:column; }
+  .rule-item{ padding:24px 0; border-bottom:1px solid var(--line); display:flex; gap:24px; }
+  .rule-item:first-child{ border-top:1px solid var(--line); }
+  .rule-idx{ font-family:'JetBrains Mono',monospace; color:var(--safe); font-size:13px; min-width:32px; }
+  .rule-text h4{ font-size:16px; font-weight:600; margin-bottom:4px; }
+  .rule-text p{ font-size:14px; color:var(--text-dim); line-height:1.6; }
+
+  /* ---------- FOOTER ---------- */
+  footer{ border-top:1px solid var(--line); padding:56px 0 32px; }
+  .footer-top{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:32px; margin-bottom:48px; }
+  .footer-cta h2{ font-size:clamp(36px,6vw,64px); max-width:520px; }
+  .footer-socials{ display:flex; gap:20px; }
+  .footer-socials a{ font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
+  .footer-socials a:hover{ color:var(--text); }
+  .footer-bottom{ display:flex; justify-content:space-between; padding-top:24px; border-top:1px solid var(--line); font-size:12px; color:var(--text-dim); flex-wrap:wrap; gap:12px; }
+
+  ::selection{ background:var(--danger); color:#0B0F0D; }
+
+  @media (prefers-reduced-motion: reduce){
+    .zone-ring.r3{ animation:none; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    <div class="logo-text">Booyah X</div>
+  </div>
+  <div class="nav-links">
+    <a href="#format">Format</a>
+    <a href="#prize">Prize Pool</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#rules">Rules</a>
+  </div>
+  <a href="#register" class="nav-cta">Register Squad</a>
+<a href="https://drive.google.com/file/d/1ode5lxg5wi4wqqbUpF8H847f95nwT3F8/view?usp=drive_link" class="btn-ghost">Download App (APK)</a>
+</nav>
+
+<section class="hero">
+  <div class="zone-visual" aria-hidden="true">
+    <div class="zone-ring r1"></div>
+    <div class="zone-ring r2"></div>
+    <div class="zone-ring r3"></div>
+    <div class="zone-dot" style="top:30%; left:60%;"></div>
+    <div class="zone-dot" style="top:65%; left:45%;"></div>
+    <div class="zone-dot" style="top:48%; left:70%;"></div>
+  </div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow">Squad Championship</div>
+    <h1>Booyah<br>X<span class="accent">.</span></h1>
+    <p class="hero-sub">48 squads. One shrinking map. The last team standing inside the final circle takes the crown — and ₹5,00,000. Booyah or bust.</p>
+    <div class="hero-actions">
+      <a href="#register" class="btn-primary">Register Your Squad</a>
+      <a href="#format" class="btn-ghost">View Format</a>
+    </div>
+    <div class="timer-strip mono" id="countdown">
+      <div class="timer-cell"><div class="num" id="cd-days">--</div><div class="lbl">Days</div></div>
+      <div class="timer-cell"><div class="num" id="cd-hours">--</div><div class="lbl">Hours</div></div>
+      <div class="timer-cell"><div class="num" id="cd-mins">--</div><div class="lbl">Mins</div></div>
+      <div class="timer-cell"><div class="num" id="cd-secs">--</div><div class="lbl">Secs</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="format">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">// Tournament Format</span>
+        <h2>Three Rounds.<br>Zero Mercy.</h2>
+      </div>
+      <p class="section-desc">Every squad fights through qualifiers before the map, and the competition, gets tighter.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="val"><span>48</span></div><div class="lbl">Squads Registered</div></div>
+      <div class="stat-cell"><div class="val">4</div><div class="lbl">Players Per Squad</div></div>
+      <div class="stat-cell"><div class="val">12</div><div class="lbl">Matches Total</div></div>
+      <div class="stat-cell"><div class="val"><span>1</span></div><div class="lbl">Champion Squad</div></div>
+    </div>
+
+    <div style="height:56px;"></div>
+
+    <div class="format-grid">
+      <div class="format-card">
+        <span class="fnum">PHASE 01</span>
+        <h3>Qualifiers</h3>
+        <p>48 squads split across 4 lobbies. Points from placement and eliminations across 3 matches. Top 3 squads per lobby advance.</p>
+      </div>
+      <div class="format-card">
+        <span class="fnum">PHASE 02</span>
+        <h3>Semifinals</h3>
+        <p>12 surviving squads, 2 lobbies, 3 matches each. Highest combined score per lobby moves on to the grand finale.</p>
+      </div>
+      <div class="format-card">
+        <span class="fnum">PHASE 03</span>
+        <h3>Grand Finale</h3>
+        <p>6 squads, single lobby, best of 3 on rotating maps. Highest total score across all matches wins  Booyah X .</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="prize">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">// Prize Pool</span>
+        <h2>₹1,000 On The Line</h2>
+      </div>
+      <p class="section-desc">Split across the top 5 finishing squads, plus a bonus for most eliminations in the finale.</p>
+    </div>
+
+    <div class="prize-list">
+      <div class="prize-row gold">
+        <div class="prize-rank">01</div>
+        <div class="prize-team-label">INUMAKI LIVE</div>
+        <div class="prize-amount">₹8,00,000</div>
+      </div>
+      <div class="prize-row">
+        <div class="prize-rank">02</div>
+        <div class="prize-team-label">---SHANKS---</div>
+        <div class="prize-amount">₹5,00,000</div>
+      </div>
+      <div class="prize-row">
+        <div class="prize-rank">03</div>
+        <div class="prize-team-label">NG ESPORTS</div>
+        <div class="prize-amount">₹70,000</div>
+      </div>
+      <div class="prize-row">
+        <div class="prize-rank">04–05</div>
+        <div class="prize-team-label">Fourth &amp; Fifth Place</div>
+        <div class="prize-amount">₹53,000 each</div>
+      </div>
+      <div class="prize-row">
+        <div class="prize-rank">MVP</div>
+        <div class="prize-team-label">Most Eliminations — Grand Finale</div>
+        <div class="prize-amount">₹25,000</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="schedule">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">// Schedule</span>
+        <h2>Mark The Map</h2>
+      </div>
+      <p class="section-desc">All match times listed in IST. Full lobby assignments are shared with registered squads 48 hours before each phase.</p>
+    </div>
+
+    <div class="schedule">
+      <div class="day-row live">
+        <div class="day-date">AUG 02</div>
+        <div class="day-title">Qualifiers — Lobby A &amp; B</div>
+        <div class="day-phase">Phase 01</div>
+      </div>
+      <div class="day-row">
+        <div class="day-date">AUG 03</div>
+        <div class="day-title">Qualifiers — Lobby C &amp; D</div>
+        <div class="day-phase">Phase 01</div>
+      </div>
+      <div class="day-row">
+        <div class="day-date">AUG 09</div>
+        <div class="day-title">Semifinals — Lobby A &amp; B</div>
+        <div class="day-phase">Phase 02</div>
+      </div>
+      <div class="day-row">
+        <div class="day-date">AUG 16</div>
+        <div class="day-title">Grand Finale — Top 6 Squads</div>
+        <div class="day-phase">Phase 03</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="register">
+  <div class="wrap">
+    <div class="register-panel">
+      <div class="register-info">
+        <h2>Drop In.</h2>
+        <p>Squads of exactly 4 players. Registration closes 24 hours before Phase 01 or once all 48 slots fill, whichever comes first.</p>
+        <ul>
+          <li>All players must be level 40+ in-game with a public match history.</li>
+          <li>One substitute per squad, named at registration.</li>
+          <li>Entry is free — this is a community-run bracket, not pay-to-play.</li>
+          <li>Confirmation and lobby details are sent to the captain's email.</li>
+        </ul>
+      </div>
+      <form id="register-form">
+        <div class="field">
+          <label for="squad-name">Squad Name</label>
+          <input type="text" id="squad-name" placeholder="e.g. Ghost Protocol" required>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="captain-name">Captain IGN</label>
+            <input type="text" id="captain-name" placeholder="In-game name" required>
+          </div>
+          <div class="field">
+            <label for="captain-id">Free Fire UID</label>
+            <input type="text" id="captain-id" placeholder="e.g. 3821049571" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="captain-email">Contact Email</label>
+          <input type="email" id="captain-email" placeholder="you@email.com" required>
+        </div>
+        <div class="field">
+          <label for="region">Region</label>
+          <select id="region" required>
+            <option value="">Select region</option>
+            <option>South Asia</option>
+            <option>MENA</option>
+            <option>Southeast Asia</option>
+            <option>Latin America</option>
+          </select>
+        </div>
+        <button type="submit" class="submit-btn">Submit Registration</button>
+        <p class="form-note">This is a demo form — no data is actually submitted anywhere.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="rules">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">// Core Rules</span>
+        <h2>Read Before<br>You Drop</h2>
+      </div>
+      <p class="section-desc">Full ruleset is sent to captains on confirmation. These are the essentials.</p>
+    </div>
+
+    <div class="rules-list">
+      <div class="rule-item">
+        <div class="rule-idx">01</div>
+        <div class="rule-text">
+          <h4>Fair play only</h4>
+          <p>No emulators on mobile-only lobbies, no third-party software, no teaming outside your registered squad. Violations mean instant disqualification.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-idx">02</div>
+        <div class="rule-text">
+          <h4>Check-in window</h4>
+          <p>Squads must check in within 30 minutes of their lobby's start time. No-shows forfeit that match's points.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-idx">03</div>
+        <div class="rule-text">
+          <h4>Scoring</h4>
+          <p>Placement points plus 1 point per elimination. Ties are broken by total eliminations, then by best single-match placement.</p>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-idx">04</div>
+        <div class="rule-text">
+          <h4>Disputes</h4>
+          <p>Any scoring or conduct dispute must be raised within 15 minutes of match end via the tournament admin channel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-cta">
+        <span class="section-tag">// Get In The Circle</span>
+        <h2>Squad up before<br>the zone closes.</h2>
+      </div>
+      <div class="footer-socials">
+        <a href="https://instagram.com/its__.shashank" target="_blank">Instagram</a>
+        <a href="https://discord.gg/your-invite" target="_blank">Discord</a>
+        <a href="https://youtube.com/@TODO_LIVE" target="_blank">YouTube</a>
+        <a href="https://x.com/your_handle" target="_blank">Twitter / X</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Booyah X — an independent community tournament.</span>
+      <span>Not affiliated with or endorsed by Garena.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // countdown to a placeholder tournament start date
+  const target = new Date("2026-08-02T18:00:00");
+
+  function updateCountdown(){
+    const now = new Date();
+    let diff = Math.max(0, target - now);
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff / (1000*60*60)) % 24);
+    const mins = Math.floor((diff / (1000*60)) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+    document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+    document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  document.getElementById('register-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const btn = this.querySelector('.submit-btn');
+    const original = btn.textContent;
+    btn.textContent = 'Registered ✓';
+    btn.style.opacity = '0.7';
+    setTimeout(()=>{ btn.textContent = original; btn.style.opacity = '1'; this.reset(); }, 2200);
+  });
+</script>
+
+</body>
+</html>
